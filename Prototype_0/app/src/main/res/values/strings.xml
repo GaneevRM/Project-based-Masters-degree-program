@@ -12,4 +12,7 @@
     <string name="stop_file">Stop File</string>
     <string name="pause">Pause</string>
     <string name="continueRecognition">Continue</string>
+    <string name="detectImage">Изображение</string>
+    <string name="detectAudio">Аудио</string>
+    <string name="report">Отчёты</string>
 </resources>

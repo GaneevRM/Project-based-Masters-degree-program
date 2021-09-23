@@ -15,7 +15,6 @@
 package com.ganeevrm.prototype_0;
 
 import android.Manifest;
-import android.app.Activity;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.text.method.ScrollingMovementMethod;
@@ -24,6 +23,7 @@ import android.widget.TextView;
 import android.widget.ToggleButton;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
@@ -39,7 +39,7 @@ import org.vosk.android.StorageService;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class VoskActivity extends Activity implements RecognitionListener {
+public class VoskActivity extends AppCompatActivity implements RecognitionListener {
 
     static private final int STATE_START = 0;
     static private final int STATE_READY = 1;
@@ -58,7 +58,7 @@ public class VoskActivity extends Activity implements RecognitionListener {
     @Override
     public void onCreate(Bundle state) {
         super.onCreate(state);
-        setContentView(R.layout.main);
+        setContentView(R.layout.activity_vosk);
 
         // Setup layout
         resultView = findViewById(R.id.result_text);
