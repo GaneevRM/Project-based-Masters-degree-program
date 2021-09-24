@@ -27,6 +27,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.vosk.LibVosk;
 import org.vosk.LogLevel;
 import org.vosk.Model;
@@ -64,7 +66,6 @@ public class VoskActivity extends AppCompatActivity implements RecognitionListen
         resultView = findViewById(R.id.result_text);
         setUiState(STATE_START);
 
-        findViewById(R.id.recognize_file).setOnClickListener(view -> recognizeFile());
         findViewById(R.id.recognize_mic).setOnClickListener(view -> recognizeMicrophone());
         ((ToggleButton) findViewById(R.id.pause)).setOnCheckedChangeListener((view, isChecked) -> pause(isChecked));
 
@@ -121,21 +122,32 @@ public class VoskActivity extends AppCompatActivity implements RecognitionListen
 
     @Override
     public void onResult(String hypothesis) {
-        resultView.append(hypothesis + "\n");
+        try {
+            JSONObject jsonResponse = new JSONObject(hypothesis);
+            if(jsonResponse.has("text")){
+                String jsonResult = jsonResponse.getString("text");
+                if(!jsonResult.isEmpty()){
+                    resultView.setText(jsonResult);
+                }
+            }
+        } catch (JSONException jsonException) {
+            jsonException.printStackTrace();
+        }
+
     }
 
     @Override
     public void onFinalResult(String hypothesis) {
-        resultView.append(hypothesis + "\n");
+        /*resultView.append(hypothesis + "\n");
         setUiState(STATE_DONE);
         if (speechStreamService != null) {
             speechStreamService = null;
-        }
+        }*/
     }
 
     @Override
     public void onPartialResult(String hypothesis) {
-        resultView.append(hypothesis + "\n");
+        /*resultView.append(hypothesis + "\n");*/
     }
 
     @Override
@@ -153,35 +165,28 @@ public class VoskActivity extends AppCompatActivity implements RecognitionListen
             case STATE_START:
                 resultView.setText(R.string.preparing);
                 resultView.setMovementMethod(new ScrollingMovementMethod());
-                findViewById(R.id.recognize_file).setEnabled(false);
                 findViewById(R.id.recognize_mic).setEnabled(false);
                 findViewById(R.id.pause).setEnabled((false));
                 break;
             case STATE_READY:
                 resultView.setText(R.string.ready);
                 ((Button) findViewById(R.id.recognize_mic)).setText(R.string.recognize_microphone);
-                findViewById(R.id.recognize_file).setEnabled(true);
                 findViewById(R.id.recognize_mic).setEnabled(true);
                 findViewById(R.id.pause).setEnabled((false));
                 break;
             case STATE_DONE:
-                ((Button) findViewById(R.id.recognize_file)).setText(R.string.recognize_file);
                 ((Button) findViewById(R.id.recognize_mic)).setText(R.string.recognize_microphone);
-                findViewById(R.id.recognize_file).setEnabled(true);
                 findViewById(R.id.recognize_mic).setEnabled(true);
                 findViewById(R.id.pause).setEnabled((false));
                 break;
             case STATE_FILE:
-                ((Button) findViewById(R.id.recognize_file)).setText(R.string.stop_file);
                 resultView.setText(getString(R.string.starting));
                 findViewById(R.id.recognize_mic).setEnabled(false);
-                findViewById(R.id.recognize_file).setEnabled(true);
                 findViewById(R.id.pause).setEnabled((false));
                 break;
             case STATE_MIC:
                 ((Button) findViewById(R.id.recognize_mic)).setText(R.string.stop_microphone);
                 resultView.setText(getString(R.string.say_something));
-                findViewById(R.id.recognize_file).setEnabled(false);
                 findViewById(R.id.recognize_mic).setEnabled(true);
                 findViewById(R.id.pause).setEnabled((true));
                 break;
@@ -193,7 +198,6 @@ public class VoskActivity extends AppCompatActivity implements RecognitionListen
     private void setErrorState(String message) {
         resultView.setText(message);
         ((Button) findViewById(R.id.recognize_mic)).setText(R.string.recognize_microphone);
-        findViewById(R.id.recognize_file).setEnabled(false);
         findViewById(R.id.recognize_mic).setEnabled(false);
     }
 
