@@ -13,7 +13,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String COLUMN_ID = "_id";
     public static final String COLUMN_CODE = "code";
     public static final String COLUMN_DEFECT = "defect";
-    private static final String COLUMN_REASON = "reason";
+    public static final String COLUMN_REASON = "reason";
 
     public DatabaseHelper(Context context){
         super(context,DATABASE_NAME, null, SCHEMA);
@@ -22,7 +22,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL("CREATE TABLE problems (" + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
-                COLUMN_CODE + " INTEGER, " + COLUMN_DEFECT + " TEXT);");
+                COLUMN_CODE + " INTEGER, " + COLUMN_DEFECT + " TEXT, " + COLUMN_REASON + " INTEGER);");
 
         db.execSQL("INSERT INTO " + TABLE_PROBLEMS + " (" + COLUMN_CODE + ", " + COLUMN_DEFECT + ", " + COLUMN_REASON + ") VALUES (100, 'Нет загрузки с жёсткого диска', 3);");
         db.execSQL("INSERT INTO " + TABLE_PROBLEMS + " (" + COLUMN_CODE + ", " + COLUMN_DEFECT + ", " + COLUMN_REASON + ") VALUES (112, 'Неисправность видеокарты', 5);");
