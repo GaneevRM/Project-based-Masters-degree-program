@@ -15,4 +15,7 @@
     <string name="detectImage">Изображение</string>
     <string name="detectAudio">Аудио</string>
     <string name="report">Отчёты</string>
+    <string name="code">Код</string>
+    <string name="defect">Неисправность</string>
+    <string name="reason">Код причины</string>
 </resources>
