@@ -16,9 +16,13 @@ package com.ganeevrm.prototype_0;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.text.method.ScrollingMovementMethod;
 import android.widget.Button;
+import android.widget.ListView;
+import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
@@ -57,6 +61,12 @@ public class VoskActivity extends AppCompatActivity implements RecognitionListen
     private SpeechStreamService speechStreamService;
     private TextView resultView;
 
+    private DatabaseHelper databaseHelper;
+    private SQLiteDatabase db;
+    private Cursor defectCursor;
+    private SimpleCursorAdapter scAdapter;
+    private ListView defectList;
+
     @Override
     public void onCreate(Bundle state) {
         super.onCreate(state);
@@ -66,10 +76,14 @@ public class VoskActivity extends AppCompatActivity implements RecognitionListen
         resultView = findViewById(R.id.result_text);
         setUiState(STATE_START);
 
+        defectList = findViewById(R.id.defectList);
         findViewById(R.id.recognize_mic).setOnClickListener(view -> recognizeMicrophone());
         ((ToggleButton) findViewById(R.id.pause)).setOnCheckedChangeListener((view, isChecked) -> pause(isChecked));
 
         LibVosk.setLogLevel(LogLevel.INFO);
+
+        databaseHelper = new DatabaseHelper(getApplicationContext());
+        db = databaseHelper.getReadableDatabase();
 
         // Check if user has given permission to record audio, init the model after permission is granted
         int permissionCheck = ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.RECORD_AUDIO);
@@ -128,6 +142,21 @@ public class VoskActivity extends AppCompatActivity implements RecognitionListen
                 String jsonResult = jsonResponse.getString("text");
                 if(!jsonResult.isEmpty()){
                     resultView.setText(jsonResult);
+                    int i = 0;
+                    StringBuilder query = new StringBuilder("SELECT * FROM " + DatabaseHelper.TABLE_PROBLEMS + " WHERE ");
+                    String[] subStr;
+                    String delimeter = " ";
+                    subStr = jsonResult.split(delimeter);
+                    while (i < subStr.length - 1){
+                        query.append(DatabaseHelper.COLUMN_DEFECT + " LIKE " ).append("'%").append(subStr[i]).append("%'").append(" OR ");
+                        i++;
+                    }
+                    query.append(DatabaseHelper.COLUMN_DEFECT + " LIKE " ).append("'%").append(subStr[i]).append("%'").append(";");
+                    defectCursor =  db.rawQuery(query.toString(), null);
+                    String[] from = new String[] { DatabaseHelper.COLUMN_CODE, DatabaseHelper.COLUMN_DEFECT, DatabaseHelper.COLUMN_REASON };
+                    int[] to = new int[] { R.id.code, R.id.defect, R.id.reason };
+                    scAdapter = new SimpleCursorAdapter(this, R.layout.list_defect_item, defectCursor, from, to, 0);
+                    defectList.setAdapter(scAdapter);
                 }
             }
         } catch (JSONException jsonException) {
